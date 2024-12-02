@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { formatDate } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { MessageSeenSvg } from "@/lib/svgs";
@@ -7,9 +8,11 @@ import { api } from "../../../convex/_generated/api";
 import { useConversationStore } from "@/store/chat-store";
 import { useMutation } from "convex/react";
 import toast from "react-hot-toast";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
 
 
 const Conversation = ({ conversation }: { conversation: any }) => {
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
 	const deleteConversation = useMutation(api.messages.deleteConversation);
     const conversationImage = conversation.groupImage || conversation.image;
     const conversationName = conversation.groupName || conversation.name;
@@ -21,8 +24,7 @@ const Conversation = ({ conversation }: { conversation: any }) => {
     
     const activeBgClass = selectedConversation?._id === conversation._id;
 
-    const handleDelete = async (e: React.MouseEvent) => {
-		e.stopPropagation();
+    const handleDelete = async () => {
 		if (!me) {
 			toast.error("User information is not available");
 			return;
@@ -58,7 +60,7 @@ const Conversation = ({ conversation }: { conversation: any }) => {
                         <span className='text-xs text-gray-500 ml-auto'>
                             {formatDate(lastMessage?._creationTime || conversation._creationTime)}
                         </span>
-                        <button onClick={handleDelete} className='ml-2'>
+                        <button onClick={(e) => { e.stopPropagation(); setIsDialogOpen(true); }} className='ml-2'>
                             <Trash size={16} />
                         </button>
                     </div>
@@ -79,6 +81,25 @@ const Conversation = ({ conversation }: { conversation: any }) => {
                 </div>
             </div>
             <hr className='h-[1px] mx-10 bg-gray-primary' />
+
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Confirm Deletion</DialogTitle>
+                    </DialogHeader>
+                    <DialogDescription>
+                        Are you sure you want to delete this conversation?
+                    </DialogDescription>
+                    <div className='flex justify-end gap-4 mt-4'>
+                        <button onClick={() => setIsDialogOpen(false)} className='px-4 py-2 bg-white border rounded'>
+                            No
+                        </button>
+                        <button onClick={() => { handleDelete(); setIsDialogOpen(false); }} className='px-4 py-2 bg-red-500 text-white rounded'>
+                            Yes
+                        </button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </>
     );
 };

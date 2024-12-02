@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
-import { ImageIcon, Plus, Video } from "lucide-react";
+import { ImageIcon, Paperclip, Plus, Video, Mic } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription } from "../ui/dialog";
 import { Button } from "../ui/button";
 import Image from "next/image";
@@ -10,7 +10,11 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useConversationStore } from "@/store/chat-store";
 
-const MediaDropdown = () => {
+interface MediaDropdownProps {
+  startRecording?: () => void;
+}
+
+const MediaDropdown = ({ startRecording }: MediaDropdownProps) => {
     const imageInput = useRef<HTMLInputElement>(null);
     const videoInput = useRef<HTMLInputElement>(null);
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -117,6 +121,12 @@ const MediaDropdown = () => {
 		}
 	};
 
+    useEffect(() => {
+        if (selectedFile) {
+            handleSendFile();
+        }
+    }, [selectedFile]);
+
     return (
         <>
             <input
@@ -175,13 +185,14 @@ const MediaDropdown = () => {
                         <Video size={20} className='mr-1' />
                         Video
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => {
-    					fileInput.current!.click();
-    					handleSendFile();
-					}}>
-    					<Plus size={20} className='mr-1' />
-    					File
-					</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => fileInput.current!.click()}>
+                        <Paperclip size={20} className='mr-1' />
+                        File
+                    </DropdownMenuItem>
+                    {/* <DropdownMenuItem onClick={startRecording}>
+                        <Mic size={20} className='mr-1' /> 
+                        Voice Message
+                    </DropdownMenuItem> */}
                 </DropdownMenuContent>
             </DropdownMenu>
         </>
